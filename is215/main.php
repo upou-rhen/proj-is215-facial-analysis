@@ -9,8 +9,8 @@ $s3Client = new S3Client([
     'version'     => 'latest',
     'region'      => 'ap-southeast-1',  // Set your AWS region
     'credentials' => [
-        'key'    => 'AKIA6GBMDIA7HGO27Z6J',
-        'secret' => 'rPvM91hd9SaOR710Tga8DMZFHMIMTJGVOE0GiDzL',
+        'key'    => 'XXXXXXXXXX',
+        'secret' => 'XXXXXXXXXX',
     ]
 ]);
 
