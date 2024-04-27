@@ -24,8 +24,8 @@ $s3Client = new S3Client([
     'version' => 'latest',
     'region'  => 'ap-southeast-1',
     'credentials' => [
-        'key'    => 'AKIA6GBMDIA7HGO27Z6J',
-        'secret' => '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',    
+        'key'    => 'XXXXXXXXXX',
+        'secret' => 'XXXXXXXXXX',    
     ]
 ]);
 
@@ -65,7 +65,7 @@ try {
     $response = $client->request('POST', 'https://api.openai.com/v1/chat/completions', [
         'headers' => [
             'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer sk-proj-v0AvV0e4ChPyp9NC4UhrT3BlbkFJm0OtwAhKZluFfwlAqyIV'
+            'Authorization' => 'Bearer XXXXXXXXXX'
         ],
         'json' => [
             'model' => 'gpt-4',
