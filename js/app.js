@@ -65,23 +65,6 @@ function UploadFileToS3(file) {
 
         runLambdaFn(file.name);
     });
-
-    //const url = '/g4/UploadToS3';
-    //const formData = new FormData();
-    //formData.append("file", file);
-    //formData.append("bucketName", bucketName);
-
-    //$.ajax({
-    //    url: url,
-    //    data: formData,
-    //    method: 'POST',
-    //    processData: false,
-    //    contentType: false
-    //}).done((r) => {
-    //    alert(r);
-    //}).fail((x, t, e) => {
-    //    alert(e);
-    //});
 }
 
 function runLambdaFn(key) {
