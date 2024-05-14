@@ -10,6 +10,7 @@
     "deploy": "components-v1"
   },
   "dependencies": {
+    "aws-sdk": "^2.1619.0",
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
