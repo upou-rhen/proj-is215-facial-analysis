@@ -1,2 +1,23 @@
-# proj-is215-facial-analysis
-IS 215 Project: Automatic Facial Analysis from Images using Amazon Rekognition
+This a fotoscope built in NextJS
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm install # one time only
+
+# then
+
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Learn More
