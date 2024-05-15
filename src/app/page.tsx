@@ -3,13 +3,15 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import AWS from "aws-sdk";
-import S3 from "aws-sdk/clients/s3"; //
+// import AWS from "aws-sdk";
+// import S3 from "aws-sdk/clients/s3"; //
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { fromEnv } from "@aws-sdk/credential-providers"; // ES6 import
 
 export default function Home() {
   const [files, setFiles] = useState<any>([]);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const { uploadFile } = useGenerate();
+  // const { uploadFile } = useGenerate();
   const {
     // acceptedFiles,
     getRootProps,
@@ -31,13 +33,23 @@ export default function Home() {
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-    const { data, error } = await uploadFile(files[0]);
+    const formData = new FormData();
+    formData.append("file", files[0])
 
-    if (error) {
-      setIsGenerating(false);
+    const res = await fetch('/api', {
+      method: "POST",
+      body: formData,
+      // headers: {
+      //   'Content-Type': 'multipart/form-data'
+      // }
+    });
+    const data = await res.json()
+
+    if (data.error) {
+      alert("Something went wrong")
+      setIsGenerating(false)
     }
 
-    // handle data here
     console.log("data ==>", data);
   };
 
@@ -113,47 +125,53 @@ const Loading = () => {
   );
 };
 
-const useGenerate = () => {
-  const bucketName = "is215-a5-rmcallado";
-  const bucketUrl = "https://" + bucketName + ".s3.amazonaws.com/";
 
-  const S3_BUCKET = bucketName; // Replace with your bucket name
-  const REGION = "us-east-1"; // Replace with your region
 
-  const uploadFile = async (file: any) => {
-    AWS.config.update({
-      accessKeyId: "your_accesskeyID",
-      secretAccessKey: "your_secretAccessKey",
-    });
+// const REGION = "us-east-1";
+// const s3Client = new S3Client({
+//   region: REGION,
+//   credentials: fromEnv()
+// });
 
-    const s3 = new S3({
-      params: { Bucket: S3_BUCKET },
-      region: REGION,
-    });
+// const useGenerate = () => {
+//   const uploadFile = async (file: any) => {
+//     const command = new PutObjectCommand({
+//       Bucket: "is215-g4-bucket",
+//       Key: file.name,
+//       Body: file,
+//     });
 
-    const params = {
-      Bucket: S3_BUCKET,
-      Key: file.name,
-      Body: file,
-    };
+//     try {
+//       const response = await s3Client.send(command);
+//       console.log(response);
+//       return {
+//         error: false,
+//         data: response
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       return {
+//         error: true,
+//         data: undefined
+//       }
+//     }
+//   }
 
-    try {
-      const upload = await s3.putObject(params).promise();
-      console.log("upload ==>", upload);
-      return {
-        error: false,
-        data: {},
-      };
-    } catch (error) {
-      console.error(error);
-      return {
-        error: true,
-        data: {},
-      };
-    }
-  };
+//   return {
+//     uploadFile,
+//   };
+// };
 
-  return {
-    uploadFile,
-  };
-};
+// const useAuthorise = () => {
+//   const getToken = () => {
+
+
+//     return null
+//   }
+
+//   const getLoginData = () => {
+
+//   }
+
+//   return { getToken }
+// }
