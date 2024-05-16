@@ -6,13 +6,14 @@ $(function () {
         var fileInput = document.getElementById('imageFileUpload');
         var file = fileInput.files[0];
         if (!file) {
-            alert('Please select a file.');
+            swal('Error', 'Please select a file.', 'error')
             return;
         }
         var fileName = file.name;
         var fileExtensions = ['jpeg', 'jpg', 'png', 'bmp'];
         if ($.inArray(fileName.split('.').pop().toLowerCase(), fileExtensions) == -1) {
-            alert("Only these formats are allowed : " + fileExtensions.join(', '));
+            const msg = "Only these formats are allowed : " + fileExtensions.join(', ');
+            swal('Error', msg, 'error')
             return;
         }
 
@@ -22,6 +23,7 @@ $(function () {
     });
 
     $('#startButton').on('click', function () {
+        $('#imageFileUpload').val('');
         $('#uploadModal').modal('show');
     });
 });
@@ -29,9 +31,6 @@ $(function () {
 var bucketName = 'is215-g4-bucket';
 var bucketUrl = 'https://' + bucketName + '.s3.amazonaws.com/';
 var region = 'us-east-1';
-var accessKeyId = '';
-var secretAccessKey = '';
-var token = '';
 
 function toggleControls(state) {
     $('#UploadToS3').toggleClass('d-none');
@@ -40,63 +39,48 @@ function toggleControls(state) {
 }
 
 function UploadFileToS3(file) {
-    accessKeyId = $('#accessId').val();
-    secretAccessKey = $('#accessKey').val();
-    token = $('#token').val();
-
     AWS.config.update({
-        region: region,
-        credentials: new AWS.Credentials(accessKeyId, secretAccessKey, token)
+        region: region
     });
 
-    var params = {
-        Bucket: bucketName,
-        Key: file.name,
-        Body: file,
-    };
+    const url = $('#uploadFileUrl').val();
+    const token = $('input[name=__RequestVerificationToken]').val();
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('__RequestVerificationToken', token);
 
-    var s3 = new AWS.S3();
-    s3.putObject(params, function (err, data) {
-        if (err) {
-            swal('Error', `Error uploading file: ${err}`, 'error');
+    $.ajax({
+        url: url,
+        data: formData,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        beforeSend: function () {
+
+        }
+    })
+        .done((r) => {
+            // success
+            if (r.payload) {
+                const p = JSON.parse(r.payload);
+                parseLambdaResponse(r.key, p.body);
+            }
+            else
+                swal('Oops!', 'There was a problem processing your image file.', 'error');
+        })
+        .fail((x, t, e) => {
+            if (e !== '')
+                swal('Oops!', e, 'error');
+            else
+                swal('Oops!', x.responseText, 'error');
+        })
+        .always(() => {
             toggleControls(false);
-            return;
-        }
-
-        runLambdaFn(file.name);
-    });
-}
-
-function runLambdaFn(key) {
-    var lambda = new AWS.Lambda();
-    var params = {
-        FunctionName: 'getHtmlResponseFromChatGpt',
-        Payload: JSON.stringify({ key: key, bucket: bucketName })
-    };
-    lambda.invoke(params, function (err, data) {
-        if (err) {
-            swal('Error',`Error calling Lambda function: ${err}`, 'error');
-            toggleControls(false);
-            return;
-        }
-
-        console.log('Lambda function called successfully.');
-        console.log({ data });
-        let payload = JSON.parse(data.Payload);
-        console.log({ payload });
-        if (!payload.errorMessage) {
-            parseLambdaResponse(key, payload.body);
-        }
-        else
-            swal('Error', payload.errorMessage,'error');
-
-        toggleControls(false);
-    });
+        });
 }
 
 function parseLambdaResponse(key, response) {
-    console.log({ response });
-    if (response !== undefined) {
+    if (response) {
         $('#uploadModal').modal('hide');
         $('#jumbotron').hide();
 
@@ -140,6 +124,6 @@ function parseLambdaResponse(key, response) {
         $('#articleContainer').toggleClass('d-none');
     }
     else {
-        swal('Error','Unable to retrieve response from the AWS Lambda function.','error');
+        swal('Oops!', 'Unable to retrieve response from the AWS Lambda function.', 'error');
     }
 }
