@@ -3,10 +3,10 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
-// import AWS from "aws-sdk";
-// import S3 from "aws-sdk/clients/s3"; //
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { fromEnv } from "@aws-sdk/credential-providers"; // ES6 import
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Home() {
   const [files, setFiles] = useState<any>([]);
@@ -38,19 +38,21 @@ export default function Home() {
 
     const res = await fetch('/api', {
       method: "POST",
-      body: formData,
-      // headers: {
-      //   'Content-Type': 'multipart/form-data'
-      // }
+      body: formData
     });
     const data = await res.json()
 
     if (data.error) {
-      alert("Something went wrong")
+      toast.error("Something went wrong!", {
+        position: "bottom-right"
+      });
       setIsGenerating(false)
+    } else {
+      toast.success("Image uploaded! Generating news...", {
+        position: "bottom-right"
+      });
     }
 
-    console.log("data ==>", data);
   };
 
 
@@ -100,12 +102,13 @@ export default function Home() {
                 onClick={handleGenerate}
               >
                 {isGenerating ? <Loading /> : null}
-                Generate news
+                {isGenerating ? "Generating" : "Generate"} news
               </button>
             </div>
           </div>
         ) : null}
       </section>
+      <ToastContainer />
     </main>
   );
 }
